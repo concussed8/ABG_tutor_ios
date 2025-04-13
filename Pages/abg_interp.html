@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- Simulate a smartphone viewport -->
+  <meta name="viewport" content="width=375, initial-scale=1.0">
+  <title>Phone Container with Report</title>
+  <style>
+    /* Basic reset and page styling */
+    body {
+      margin: 0;
+      padding: 0;
+      background: #f0f0f0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    
+    /* Outer phone container with a custom background (via pseudo-element) */
+    .phone-container {
+      position: relative;
+      width: 375px;
+      height: 667px;
+      border: 4px solid black;
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      margin: 20px;
+      background: transparent;
+    }
+    .phone-container::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #d8d8e3;
+      background-image: repeating-radial-gradient(circle at 0 0, transparent 0, #d8d8e3 10px),
+                        repeating-linear-gradient(#1a1e5655, #1a1e56);
+      opacity: 0.5;
+      z-index: 0;
+    }
+.analysis-bounce {
+  position: absolute;
+  top: 53.5%; /* Adjust as needed */
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  z-index: 100;
+  font-family: Georgia, serif;
+  font-weight: bold;
+  font-size: 1.5em;
+  color: red;
+}
+
+.letter {
+  display: inline-block;
+  animation: bounce 0.6s ease-in-out infinite alternate;
+  text-shadow:
+    0 0 5px red,
+    0 0 10px red,
+    0 0 15px darkred;
+}
+
+.letter:nth-child(1) { animation-delay: 0s; }
+.letter:nth-child(2) { animation-delay: 0.1s; }
+.letter:nth-child(3) { animation-delay: 0.2s; }
+.letter:nth-child(4) { animation-delay: 0.3s; }
+.letter:nth-child(5) { animation-delay: 0.4s; }
+.letter:nth-child(6) { animation-delay: 0.5s; }
+.letter:nth-child(7) { animation-delay: 0.6s; }
+.letter:nth-child(8) { animation-delay: 0.7s; }
+
+@keyframes bounce {
+  100% {
+    transform: translateY(-10px) scale(1.2);
+  }
+}
+
+
+ 
+    /* Gem image styling: centered horizontally at the top.
+       Its transition will continuously zoom it out to scale 0 and opacity 0. */
+    .gem {
+      position: absolute;
+      top: 30%;         /* Adjust vertical position as needed */
+      left: 50%;        /* Center horizontally */
+      transform: translateX(-50%);
+      width: 50%;       /* Adjust width as desired */
+      height: auto;     /* Maintain aspect ratio */
+      z-index: 2;
+      transition: transform 1s ease-in-out, opacity 1s ease-in-out;
+    }
+    .gem.zoomed-out {
+      transform: translateX(-50%) scale(0);
+      opacity: 0;
+    }
+    
+ .phone-title {
+  position: absolute;
+  top: 2%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 22em; /* Wider for longer title */
+  margin: 0 auto;
+  font-size: 180%;
+  font-family: 'Georgia', serif;
+  font-weight: bold;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  border-right: 2px solid black;
+  z-index: 3;
+  color: black;
+}
+
+/* Typewriter animation */
+.anim-typewriter {
+  animation: typewriter 4s steps(26) 0.5s 1 normal both,
+             blinkTextCursor 500ms steps(26) infinite normal;
+}
+
+@keyframes typewriter {
+  from { width: 0; }
+  to { width: 22em; }
+}
+
+@keyframes blinkTextCursor {
+  from { border-right-color: black; }
+  to { border-right-color: transparent; }
+}
+
+/* Style for the ANALYZE button */
+.analyze-btn {
+  position: absolute;          /* Position absolutely within the container */
+  bottom: 27%;                /* Adjust vertical positioning as needed */
+  left: 80%;                   /* Center horizontally */
+  transform: translateX(-50%); /* Exactly center it horizontally */
+  background-color: black;     /* Black background */
+  color: white;                /* White text */
+  font-family: Georgia, serif; /* Georgia font */
+  font-weight: bold;           /* Bold text */
+  font-size: 14px;             /* Font size (adjustable) */
+  width: 100px;                /* Button width (adjustable) */
+  height: 50px;                /* Button height (adjustable) */
+  border: 2px solid white;     /* White border */
+  border-radius: 10px;         /* Rounded corners */
+  z-index: 1000;               /* High z-index so it stays on top */
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 5); /* Shadow for depth */
+  cursor: pointer;
+  display: none;               /* Initially hidden, will be shown via JS */
+}
+
+
+    /* List boxes container */
+.list-boxes {
+  position: absolute;
+  top: 60%;
+  left: 30%;
+  transform: translateX(-50%);
+  display: none;        /* Hidden initially */
+  flex-direction: column;
+  align-items: center;
+  z-index: 9999;         /* Way on top to avoid overlap */
+}
+
+    .list-box {
+      border: 1px solid black;
+      padding: 5px;
+      font-size: 1em;
+      background-color: #fff;
+      width: 22ch;  /* Adjust width as needed */
+      margin: 5px;
+    }
+
+ 
+   
+    /* White inner container with percentage-based positioning and size.
+       Left padding is removed so the criteria labels start flush with the container’s left edge.
+       Initially hidden (using transform and opacity) and will animate when the generate_abg image is clicked.
+       Its z-index is set to 100 so it appears in front of the gem image.
+    */
+    .white-container {
+      position: absolute;
+      top: 15%;       /* Vertical offset */
+      left: 5%;       /* Horizontal offset */
+      width: 90%;     /* Occupies 90% of the phone container's width */
+      background-color: #ffffff;
+      padding: 2% 2% 2% 0;  /* Top, Right, Bottom set to 2%; Left set to 0 */
+      border: 3px solid black;
+      box-sizing: border-box;
+      z-index: 100;
+      transform: scale(0);
+      opacity: 0;
+      transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+    }
+    .white-container.visible {
+      transform: scale(1);
+      opacity: 1;
+    }
+    
+    /* Report title styling */
+    .report-title {
+      margin: 0 0 2% 0;
+      text-align: center;
+      font-size: 150%;
+      font-weight: bold;
+      border-bottom: 0.5% solid #000;
+      padding-bottom: 2%;
+    }
+    
+    /* Each criteria line is structured as a two-column grid */
+    .criteria-line {
+      display: grid;
+      grid-template-columns: 40% 60%;
+      align-items: baseline;
+      margin-bottom: 2%;
+    }
+    .criteria-line:last-child {
+      margin-bottom: 0;
+    }
+    
+    /* Criteria labels are bold and right-aligned.
+       A colon is appended via a pseudo-element, ensuring all colons line up vertically.
+    */
+    .criteria-label {
+      font-weight: bold;
+      text-align: right;
+      padding-right: 50%; /* Space between the label (with colon) and the value box */
+    }
+    .criteria-label::after {
+      content: ":";
+    }
+    
+    /* Criteria values remain left-aligned in the right column */
+    .criteria-value {
+      text-align: left;
+    }
+    
+    /* Black outlined box styling for derived numeric values.
+       Width is set using 'ch' units to allow enough space for five characters.
+    */
+    .criteria-box {
+  width: 11ch;
+  padding: 5px;
+  box-sizing: border-box;
+  border: 1px solid black;
+  font-size: 1em;
+  font-weight: bold; /* ✅ Make output bold */
+}
+
+    
+    /* Arrow (norm) box styling remains in place.
+       The norm boxes are now empty but still visible with their borders.
+    */
+    .norm-box {
+      width: 3ch;
+      padding: 5px;
+      box-sizing: border-box;
+      border: 1px solid black;
+      font-size: 1em;
+      margin-left: 25px;
+      text-align: center;
+    }
+    
+    /* Generate_abg image styling.
+       The image is centered horizontally and positioned at 60% from the top (adjustable).
+       It is clickable and enlarges slightly on hover.
+    */
+    .generate-abg {
+      position: absolute;
+      top: 60%;         /* Adjustable vertical position */
+      left: 53%;        /* Center horizontally */
+      transform: translateX(-50%);
+      width: 90%;       /* Adjust width as desired */
+      height: auto;
+      cursor: pointer;
+      transition: transform 0.2s ease-in-out;
+      z-index: 3;
+      display: block;
+    }
+    .generate-abg:hover {
+      transform: translateX(-50%) scale(1.10);
+    }
+    .generate-abg.zoomed-out {
+      transform: translateX(-50%) scale(0);
+      opacity: 0;
+      transition: transform 1s ease-in-out, opacity 1s ease-in-out;
+    }
+
+/* CSS for the feedback image container */
+#resultContainer {
+  position: absolute;  /* or fixed, depending on your layout */
+  top: 12.5%;           /* adjust vertical position as desired */
+  left: 50%;           /* center horizontally */
+  transform: translateX(-50%);  /* shift back half its width */
+  width: 95%;        /* set the desired width */
+  height: 75%;       /* set the desired height */
+  z-index: 10000;       /* ensure it's in front of other content */
+  background: white;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  overflow: hidden;
+  display: none;       /* Hide container by default */
+}
+
+#resultContainer img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* or cover, depending on your preference */
+}
+
+#answerFeedbackContainer {
+  position: absolute;  /* or fixed, based on your design */
+  top: 48%;            /* vertical position */
+  left: 50%;           /* center horizontally */
+  transform: translate(-50%, -50%);
+  width: 95%;        /* set the desired width */
+  height: 60%;       /* set the desired height */
+  padding: 20px;
+  background: white;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  z-index: 10001;
+  text-align: center;
+  display: none;       /* Keep hidden until needed */
+}
+
+
+
+  </style>
+</head>
+<body>
+  <div class="phone-container">
+    <!-- Phone container title -->
+    <div class="phone-title anim-typewriter">ABG PRACTICE TUTOR</div>
+<div id="conditionDisplay" style="text-align: center; margin-top: 600px;"></div>
+
+<!-- ANALYZE button -->
+  <button class="analyze-btn">ANALYZE</button>
+
+
+<div class="analysis-bounce" style="display: none;">
+  <span class="letter">A</span>
+  <span class="letter">N</span>
+  <span class="letter">A</span>
+  <span class="letter">L</span>
+  <span class="letter">Y</span>
+  <span class="letter">S</span>
+  <span class="letter">I</span>
+  <span class="letter">S</span>
+</div>
+
+
+
+    <!-- Gem image -->
+    <img class="gem" src="https://raw.githubusercontent.com/concussed8/ABG_tutor/main/Images/gem.png" alt="Gem">
+    
+    <!-- List boxes container -->
+    <div class="list-boxes">
+        <select class="list-box ph-box" name="ph">
+        <option value="" selected disabled hidden></option>
+        <option value="Acidosis">Acidosis</option>
+        <option value="Alkalosis">Alkalosis</option>
+      </select>     
+    <select class="list-box mechanism-box" name="mechanism">
+        <option value="" selected disabled hidden></option>
+        <option value="Respiratory">Respiratory</option>
+        <option value="Metabolic">Metabolic</option>
+        <option value="Mixed">Mixed</option>
+      </select>
+    <select class="list-box compensation-box" name="compensation">
+        <option value="" selected disabled hidden></option>
+        <option value="Compensated">Compensated</option>
+        <option value="Uncompensated">Uncompensated</option>
+        <option value="PartiallyCompensated">Partially Compensated</option>
+      </select>
+</div>
+
+    
+    <!-- White inner container -->
+    <div class="white-container">
+      <div class="report-title">Patient Sample Report</div>
+      
+      <div class="criteria-line">
+        <div class="criteria-label">pH</div>
+        <div class="criteria-value">
+          <input type="text" class="criteria-box" name="pH" placeholder="pH" readonly>
+          <input type="text" class="norm-box" name="pHnorm" placeholder="" readonly>
+        </div>
+      </div>
+      
+      <div class="criteria-line">
+        <div class="criteria-label">pCO<sub>2</sub></div>
+        <div class="criteria-value">
+          <input type="text" class="criteria-box" name="pCO2" placeholder="pCO2" readonly>
+          <input type="text" class="norm-box" name="pCO2norm" placeholder="" readonly>
+        </div>
+      </div>
+      
+      <div class="criteria-line">
+        <div class="criteria-label">pO<sub>2</sub></div>
+        <div class="criteria-value">
+          <input type="text" class="criteria-box" name="pO2" placeholder="pO2" readonly>
+          <input type="text" class="norm-box" name="pO2norm" placeholder="" readonly>
+        </div>
+      </div>
+      
+      <div class="criteria-line">
+        <div class="criteria-label">SpO<sub>2</sub></div>
+        <div class="criteria-value">
+          <input type="text" class="criteria-box" name="SO2" placeholder="SO2" readonly>
+          <input type="text" class="norm-box" name="SO2norm" placeholder="" readonly>
+        </div>
+      </div>
+      
+      <div class="criteria-line">
+        <div class="criteria-label">HCO<sub>3</sub></div>
+        <div class="criteria-value">
+          <input type="text" class="criteria-box" name="HCO3" placeholder="HCO3" readonly>
+          <input type="text" class="norm-box" name="HCO3norm" placeholder="" readonly>
+        </div>
+      </div>
+      
+    </div>
+    
+    <!-- Generate_abg image -->
+    <img class="generate-abg" src="https://raw.githubusercontent.com/concussed8/ABG_tutor/main/Images/generate_abg.png" alt="Generate ABG">
+
+<!-- Place this in your HTML, where you want the result to be shown -->
+<div id="resultContainer" style="display:none;">
+  <img id="resultImage" alt="Result" style="display:none;">
+</div>
+
+<div id="answerFeedbackContainer" style="display:none;">
+  <!-- This container will display the text feedback (correct answer) when needed -->
+</div>
+
+
+
+    
+  </div>
+<script>
+  // ----------------------------------------------------------
+  // SECTION 1: Normal Reference Ranges & Units Setup
+  // Purpose: Define the normal reference ranges and associated units for the ABG parameters.
+  // ----------------------------------------------------------
+  const normalRanges = {
+    pH: { min: 7.35, max: 7.45 },
+    pCO2: { min: 35, max: 45 },
+    pO2: { min: 80, max: 100 },
+    SO2: { min: 95, max: 100 },
+    HCO3: { min: 22, max: 26 }
+  };
+
+  const units = {
+    pH: "",         // pH is unitless
+    pCO2: " mmHg",
+    pO2: " mmHg",
+    SO2: "%",
+    HCO3: " mEq/L"
+  };
+
+// ----------------------------------------------------------
+// GLOBAL VARIABLE: Current ABG Condition Identifier
+// Purpose: Store the identifier of the ABG condition generated by randomABGCondition()
+//          so that it can be used later for checking user answers.
+// ----------------------------------------------------------
+var currentABGCondition = "";  // Initially empty
+var attemptCount = 0;
+// ----------------------------------------------------------
+// PROCESS: ABG Condition Mapping Structure
+// Purpose: Create a central mapping that links each ABG condition 
+//          (by its function name) to the expected answers for the 
+//          acid-base status, mechanism, and compensation list boxes.
+//          This mapping is used to verify the user's analysis.
+// ----------------------------------------------------------
+const abgConditionMapping = {
+  metAcidPartComp: {                 // Metabolic Acidosis, Partially Compensated
+    acidBase: "Acidosis",            // Expected Acid-Base status: Acidosis
+    mechanism: "Metabolic",          // Expected mechanism: Metabolic
+    compensation: "PartiallyCompensated"  // Expected compensation: Partially Compensated
+  },
+  metAlkPartComp: {                  // Metabolic Alkalosis, Partially Compensated
+    acidBase: "Alkalosis",           
+    mechanism: "Metabolic",          
+    compensation: "PartiallyCompensated"
+  },
+  respAcidComp: {                    // Respiratory Acidosis, Compensated
+    acidBase: "Acidosis",
+    mechanism: "Respiratory",
+    compensation: "Compensated"
+  },
+  respAlkComp: {                     // Respiratory Alkalosis, Compensated
+    acidBase: "Alkalosis",
+    mechanism: "Respiratory",
+    compensation: "Compensated"
+  },
+  respAlkPartComp: {                 // Respiratory Alkalosis, Partially Compensated
+    acidBase: "Alkalosis",
+    mechanism: "Respiratory",
+    compensation: "PartiallyCompensated"
+  },
+  respiratoryAcidosis: {             // Respiratory Acidosis (Uncompensated)
+    acidBase: "Acidosis",
+    mechanism: "Respiratory",
+    compensation: "Uncompensated"
+  },
+  respiratoryAlkalosis: {            // Respiratory Alkalosis (Uncompensated)
+    acidBase: "Alkalosis",
+    mechanism: "Respiratory",
+    compensation: "Uncompensated"
+  },
+  metabolicAcidosis: {               // Metabolic Acidosis (Uncompensated)
+    acidBase: "Acidosis",
+    mechanism: "Metabolic",
+    compensation: "Uncompensated"
+  },
+  metabolicAlkalosis: {              // Metabolic Alkalosis (Uncompensated)
+    acidBase: "Alkalosis",
+    mechanism: "Metabolic",
+    compensation: "Uncompensated"
+  },
+  metabolicAcidosisCompensated: {    // Metabolic Acidosis, Compensated
+    acidBase: "Acidosis",
+    mechanism: "Metabolic",
+    compensation: "Compensated"
+  },
+  metabolicAlkalosisCompensated: {   // Metabolic Alkalosis, Compensated
+    acidBase: "Alkalosis",
+    mechanism: "Metabolic",
+    compensation: "Compensated"
+  },
+  respiratoryAcidosisPartiallyCompensated: {  // Respiratory Acidosis, Partially Compensated
+    acidBase: "Acidosis",
+    mechanism: "Respiratory",
+    compensation: "PartiallyCompensated"
+  }
+};
+
+
+  // ----------------------------------------------------------
+  // SECTION 3: Random ABG Condition Functions
+  // Purpose: Define specific condition generators that create the required ABG values.
+  // ----------------------------------------------------------
+  
+  // PROCESS: Metabolic Acidosis, Partially Compensated
+  // Purpose: Generate random ABG values to simulate metabolic acidosis with partial compensation.
+  function metAcidPartComp() {
+    // UTIL: Random Number Generator Function
+    const getRandom = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+    // PROCESS 1: pH Generation (range: 7.19–7.34)
+    const pH = (getRandom(719, 734) / 100).toFixed(2);
+    document.querySelector(`input[name="pH"]`).value = `${pH}`;
+
+    // PROCESS 2: pCO₂ Generation (range: 32–34 mmHg)
+    const pCO2 = getRandom(32, 34);
+    document.querySelector(`input[name="pCO2"]`).value = `${pCO2} mmHg`;
+
+    // PROCESS 3: HCO₃⁻ Generation based on pH
+    let hco3 = "";
+    if (pH >= 7.19 && pH <= 7.25) {
+      hco3 = getRandom(12, 14);
+    } else if (pH >= 7.26 && pH <= 7.34) {
+      hco3 = getRandom(15, 21);
+    }
+    document.querySelector(`input[name="HCO3"]`).value = `${hco3} mEq/L`;
+
+    // PROCESS 4: pO₂ Generation (range: 60–100 mmHg)
+    const pO2 = getRandom(60, 100);
+    document.querySelector(`input[name="pO2"]`).value = `${pO2} mmHg`;
+
+    // PROCESS 5: SO₂ Generation based on pO₂ tier
+    let so2 = "";
+    if (pO2 >= 60 && pO2 <= 70) {
+      so2 = getRandom(82, 88);
+    } else if (pO2 >= 71 && pO2 <= 80) {
+      so2 = getRandom(88, 92);
+    } else if (pO2 >= 81 && pO2 <= 90) {
+      so2 = getRandom(93, 95);
+    } else if (pO2 >= 91 && pO2 <= 100) {
+      so2 = getRandom(96, 99);
+    }
+    document.querySelector(`input[name="SO2"]`).value = `${so2}%`;
+
+    // PROCESS 6: Trigger Arrow Evaluation for this condition.
+    // (Updated to call evaluateArrows(), matching our defined function name.)
+    evaluateArrows();
+  }
+
+  // PROCESS: Metabolic Alkalosis, Partially Compensated
+  // Purpose: Generate random ABG values to simulate metabolic alkalosis with partial compensation.
+  function metAlkPartComp() {
+    // UTIL: Random Number Generator Function
+    const getRandom = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+    // PROCESS 1: pH Generation (range: 7.46–7.60)
+    const pH = (getRandom(746, 760) / 100).toFixed(2);
+    document.querySelector(`input[name="pH"]`).value = `${pH}`;
+
+    // PROCESS 2: pCO₂ Generation (range: 46–48 mmHg)
+    const pCO2 = getRandom(46, 48);
+    document.querySelector(`input[name="pCO2"]`).value = `${pCO2} mmHg`;
+
+    // PROCESS 3: HCO₃⁻ Generation based on pH
+    let hco3 = "";
+    if (pH >= 7.46 && pH <= 7.52) {
+      hco3 = getRandom(28, 32);
+    } else if (pH >= 7.53 && pH <= 7.60) {
+      hco3 = getRandom(33, 38);
+    }
+    document.querySelector(`input[name="HCO3"]`).value = `${hco3} mEq/L`;
+
+    // PROCESS 4: pO₂ Generation (range: 60–100 mmHg)
+    const pO2 = getRandom(60, 100);
+    document.querySelector(`input[name="pO2"]`).value = `${pO2} mmHg`;
+
+    // PROCESS 5: SO₂ Generation based on pO₂ tier
+    let so2 = "";
+    if (pO2 >= 60 && pO2 <= 70) {
+      so2 = getRandom(82, 88);
+    } else if (pO2 >= 71 && pO2 <= 80) {
+      so2 = getRandom(88, 92);
+    } else if (pO2 >= 81 && pO2 <= 90) {
+      so2 = getRandom(93, 95);
+    } else if (pO2 >= 91 && pO2 <= 100) {
+      so2 = getRandom(96, 99);
+    }
+    document.querySelector(`input[name="SO2"]`).value = `${so2}%`;
+
+    // PROCESS 6: Trigger Arrow Evaluation for this condition.
+    // (Updated to call evaluateArrows() to match our defined function.)
+    evaluateArrows();
+  }
+// ----------------------------------------------------------
+// PROCESS: Respiratory Acidosis, Compensated
+// Purpose: Generate random ABG values to simulate respiratory acidosis with compensation.
+function respAcidComp() {
+  // UTIL: Random Number Generator Function
+  const getRandom = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+  // PROCESS 1: pH Generation (range: 7.35–7.39)
+  const pH = (getRandom(735, 739) / 100).toFixed(2);
+  document.querySelector(`input[name="pH"]`).value = `${pH}`;
+
+  // PROCESS 2: pCO₂ Generation (range: 46–90 mmHg)
+  const pCO2 = getRandom(46, 90);
+  document.querySelector(`input[name="pCO2"]`).value = `${pCO2} mmHg`;
+
+  // PROCESS 3: HCO₃⁻ Generation based on pCO₂
+  let hco3;
+  if (pCO2 >= 70 && pCO2 <= 90) {
+    hco3 = getRandom(33, 38);
+  } else if (pCO2 >= 55 && pCO2 <= 69) {
+    hco3 = getRandom(28, 32);
+  } else if (pCO2 >= 46 && pCO2 <= 48) {
+    hco3 = getRandom(27, 28);
+  } else {
+    hco3 = getRandom(22, 26);
+  }
+  document.querySelector(`input[name="HCO3"]`).value = `${hco3} mEq/L`;
+
+  // PROCESS 4: pO₂ Generation (range: 60–100 mmHg)
+  const pO2 = getRandom(60, 100);
+  document.querySelector(`input[name="pO2"]`).value = `${pO2} mmHg`;
+
+  // PROCESS 5: SO₂ Generation based on pO₂ tiers
+  let so2;
+  if (pO2 >= 60 && pO2 <= 70) {
+    so2 = getRandom(82, 88);
+  } else if (pO2 >= 71 && pO2 <= 80) {
+    so2 = getRandom(88, 92);
+  } else if (pO2 >= 81 && pO2 <= 90) {
+    so2 = getRandom(93, 95);
+  } else if (pO2 >= 91 && pO2 <= 100) {
+    so2 = getRandom(96, 99);
+  }
+  document.querySelector(`input[name="SO2"]`).value = `${so2}%`;
+
+  // PROCESS 6: Trigger Arrow Evaluation for this condition.
+  evaluateArrows();
+}
+
+// ----------------------------------------------------------
+// PROCESS: Respiratory Alkalosis, Compensated
+// Purpose: Generate random ABG values to simulate respiratory alkalosis with compensation.
+function respAlkComp() {
+  // UTIL: Random Number Generator Function
+  const getRandom = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+  // PROCESS 1: pH Generation (range: 7.41–7.45)
+  const pH = (getRandom(741, 745) / 100).toFixed(2);
+  document.querySelector(`input[name="pH"]`).value = `${pH}`;
+
+  // PROCESS 2: pCO₂ Generation (range: 25–34 mmHg)
+  const pCO2 = getRandom(25, 34);
+  document.querySelector(`input[name="pCO2"]`).value = `${pCO2} mmHg`;
+
+  // PROCESS 3: HCO₃⁻ Generation based on pCO₂
+  let hco3 = "";
+  if (pCO2 >= 25 && pCO2 <= 29) {
+    hco3 = 20;
+  } else if (pCO2 >= 30 && pCO2 <= 34) {
+    hco3 = 21;
+  }
+  document.querySelector(`input[name="HCO3"]`).value = `${hco3} mEq/L`;
+
+  // PROCESS 4: pO₂ Generation (range: 60–100 mmHg)
+  const pO2 = getRandom(60, 100);
+  document.querySelector(`input[name="pO2"]`).value = `${pO2} mmHg`;
+
+  // PROCESS 5: SO₂ Generation based on pO₂ tiers
+  let so2 = "";
+  if (pO2 >= 60 && pO2 <= 70) {
+    so2 = getRandom(82, 88);
+  } else if (pO2 >= 71 && pO2 <= 80) {
+    so2 = getRandom(88, 92);
+  } else if (pO2 >= 81 && pO2 <= 90) {
+    so2 = getRandom(93, 95);
+  } else if (pO2 >= 91 && pO2 <= 100) {
+    so2 = getRandom(96, 99);
+  }
+  document.querySelector(`input[name="SO2"]`).value = `${so2}%`;
+
+  // PROCESS 6: Trigger Arrow Evaluation for this condition.
+  evaluateArrows();
+}
+
+
+// ----------------------------------------------------------
+// PROCESS: Respiratory Alkalosis, Partially Compensated
+// Purpose: Generate random ABG values to simulate respiratory alkalosis with partial compensation.
+function respAlkPartComp() {
+  // UTIL: Random Number Generator Function
+  const getRandom = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+  // PROCESS 1: pH Generation (range: 7.46–7.55)
+  const pH = (getRandom(746, 755) / 100).toFixed(2);
+  document.querySelector(`input[name="pH"]`).value = `${pH}`;
+
+  // PROCESS 2: pCO₂ Generation based on pH range
+  let pCO2 = "";
+  if (pH >= 7.46 && pH <= 7.50) {
+    pCO2 = getRandom(30, 34);
+  } else if (pH >= 7.51 && pH <= 7.55) {
+    pCO2 = getRandom(25, 29);
+  }
+  document.querySelector(`input[name="pCO2"]`).value = `${pCO2} mmHg`;
+
+  // PROCESS 3: HCO₃⁻ Generation (constant range: 19–21 mEq/L)
+  const hco3 = getRandom(19, 21);
+  document.querySelector(`input[name="HCO3"]`).value = `${hco3} mEq/L`;
+
+  // PROCESS 4: pO₂ Generation (range: 60–100 mmHg)
+  const pO2 = getRandom(60, 100);
+  document.querySelector(`input[name="pO2"]`).value = `${pO2} mmHg`;
+
+  // PROCESS 5: SO₂ Generation based on pO₂ tiers
+  let so2 = "";
+  if (pO2 >= 60 && pO2 <= 70) {
+    so2 = getRandom(82, 88);
+  } else if (pO2 >= 71 && pO2 <= 80) {
+    so2 = getRandom(88, 92);
+  } else if (pO2 >= 81 && pO2 <= 90) {
+    so2 = getRandom(93, 95);
+  } else if (pO2 >= 91 && pO2 <= 100) {
+    so2 = getRandom(96, 99);
+  }
+  document.querySelector(`input[name="SO2"]`).value = `${so2}%`;
+
+  // PROCESS 6: Trigger Arrow Evaluation for this condition
+  evaluateArrows();
+}
+
+// ----------------------------------------------------------
+// PROCESS: Respiratory Acidosis
+// Purpose: Generate random ABG values to simulate respiratory acidosis.
+function respiratoryAcidosis() {
+  // UTIL: Random Number Generator Function
+  const getRandom = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+  // PROCESS 1: pH Generation (range: 6.70–7.34)
+  const pH = (getRandom(670, 734) / 100).toFixed(2);
+  document.querySelector(`input[name="pH"]`).value = `${pH}`;
+
+  // PROCESS 2: pCO₂ Generation based on pH tier
+  let pCO2;
+  if (pH >= 6.70 && pH <= 7.10) {
+    pCO2 = getRandom(70, 90);
+  } else if (pH >= 7.11 && pH <= 7.25) {
+    pCO2 = getRandom(55, 69);
+  } else if (pH >= 7.26 && pH <= 7.34) {
+    pCO2 = getRandom(46, 68);
+  }
+  document.querySelector(`input[name="pCO2"]`).value = `${pCO2} mmHg`;
+
+  // PROCESS 3: HCO₃⁻ Generation (range: 22–26 mEq/L)
+  const hco3 = getRandom(22, 26);
+  document.querySelector(`input[name="HCO3"]`).value = `${hco3} mEq/L`;
+
+  // PROCESS 4: pO₂ Generation (range: 60–100 mmHg)
+  const pO2 = getRandom(60, 100);
+  document.querySelector(`input[name="pO2"]`).value = `${pO2} mmHg`;
+
+  // PROCESS 5: SO₂ Generation based on pO₂ tiers
+  let so2;
+  if (pO2 >= 60 && pO2 <= 70) {
+    so2 = getRandom(82, 88);
+  } else if (pO2 >= 71 && pO2 <= 80) {
+    so2 = getRandom(88, 92);
+  } else if (pO2 >= 81 && pO2 <= 90) {
+    so2 = getRandom(93, 95);
+  } else if (pO2 >= 91 && pO2 <= 100) {
+    so2 = getRandom(96, 99);
+  }
+  document.querySelector(`input[name="SO2"]`).value = `${so2}%`;
+
+  // PROCESS 6: Trigger Arrow Evaluation for this condition
+  evaluateArrows();
+}
+
+
+// ----------------------------------------------------------
+// PROCESS: Respiratory Alkalosis
+// Purpose: Generate random ABG values to simulate respiratory alkalosis.
+// ----------------------------------------------------------
+function respiratoryAlkalosis() {
+  // UTIL: Random Number Generator Function
+  const getRandom = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+  // PROCESS 1: pH Generation (range: 7.46–7.55)
+  const pH = (getRandom(746, 755) / 100).toFixed(2);
+  document.querySelector(`input[name="pH"]`).value = `${pH}`;
+
+  // PROCESS 2: pCO₂ Generation based on pH range
+  let pCO2;
+  if (pH >= 7.46 && pH <= 7.50) {
+    pCO2 = getRandom(30, 34);
+  } else if (pH >= 7.51 && pH <= 7.55) {
+    pCO2 = getRandom(25, 29);
+  }
+  document.querySelector(`input[name="pCO2"]`).value = `${pCO2} mmHg`;
+
+  // PROCESS 3: HCO₃⁻ Generation (range: 22–26 mEq/L)
+  const hco3 = getRandom(22, 26);
+  document.querySelector(`input[name="HCO3"]`).value = `${hco3} mEq/L`;
+
+  // PROCESS 4: pO₂ Generation (range: 60–100 mmHg)
+  const pO2 = getRandom(60, 100);
+  document.querySelector(`input[name="pO2"]`).value = `${pO2} mmHg`;
+
+  // PROCESS 5: SO₂ Generation based on pO₂ tiers
+  let so2;
+  if (pO2 >= 60 && pO2 <= 70) {
+    so2 = getRandom(82, 88);
+  } else if (pO2 >= 71 && pO2 <= 80) {
+    so2 = getRandom(88, 92);
+  } else if (pO2 >= 81 && pO2 <= 90) {
+    so2 = getRandom(93, 95);
+  } else if (pO2 >= 91 && pO2 <= 100) {
+    so2 = getRandom(96, 99);
+  }
+  document.querySelector(`input[name="SO2"]`).value = `${so2}%`;
+
+  // PROCESS 6: Trigger Arrow Evaluation for this condition
+  evaluateArrows();
+}
+
+// ----------------------------------------------------------
+// PROCESS: Metabolic Acidosis
+// Purpose: Generate random ABG values to simulate metabolic acidosis.
+// ----------------------------------------------------------
+function metabolicAcidosis() {
+  // UTIL: Random Number Generator Function
+  const getRandom = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+  // PROCESS 1: pH Generation (range: 7.19–7.34)
+  const pH = (getRandom(719, 734) / 100).toFixed(2);
+  document.querySelector(`input[name="pH"]`).value = `${pH}`;
+
+  // PROCESS 2: pCO₂ Generation (range: 35–45 mmHg)
+  const pCO2 = getRandom(35, 45);
+  document.querySelector(`input[name="pCO2"]`).value = `${pCO2} mmHg`;
+
+  // PROCESS 3: HCO₃⁻ Generation based on pH
+  let hco3;
+  if (pH >= 7.19 && pH <= 7.25) {
+    hco3 = getRandom(12, 14);
+  } else if (pH >= 7.26 && pH <= 7.34) {
+    hco3 = getRandom(15, 21);
+  }
+  document.querySelector(`input[name="HCO3"]`).value = `${hco3} mEq/L`;
+
+  // PROCESS 4: pO₂ Generation (range: 60–100 mmHg)
+  const pO2 = getRandom(60, 100);
+  document.querySelector(`input[name="pO2"]`).value = `${pO2} mmHg`;
+
+  // PROCESS 5: SO₂ Generation based on pO₂ tiers
+  let so2;
+  if (pO2 >= 60 && pO2 <= 70) {
+    so2 = getRandom(82, 88);
+  } else if (pO2 >= 71 && pO2 <= 80) {
+    so2 = getRandom(88, 92);
+  } else if (pO2 >= 81 && pO2 <= 90) {
+    so2 = getRandom(93, 95);
+  } else if (pO2 >= 91 && pO2 <= 100) {
+    so2 = getRandom(96, 99);
+  }
+  document.querySelector(`input[name="SO2"]`).value = `${so2}%`;
+
+  // PROCESS 6: Trigger Arrow Evaluation for this condition
+  evaluateArrows();
+}
+
+// ----------------------------------------------------------
+// PROCESS: Metabolic Alkalosis
+// Purpose: Generate random ABG values to simulate metabolic alkalosis.
+// ----------------------------------------------------------
+function metabolicAlkalosis() {
+  // UTIL: Random Number Generator Function
+  const getRandom = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+  
+  // PROCESS 1: pH Generation (range: 7.46–7.60)
+  const pH = (getRandom(746, 760) / 100).toFixed(2);
+  document.querySelector(`input[name="pH"]`).value = `${pH}`;
+  
+  // PROCESS 2: pCO₂ Generation (range: 35–45 mmHg)
+  const pCO2 = getRandom(35, 45);
+  document.querySelector(`input[name="pCO2"]`).value = `${pCO2} mmHg`;
+  
+  // PROCESS 3: HCO₃⁻ Generation based on pH
+  let hco3;
+  if (pH >= 7.46 && pH <= 7.52) {
+    hco3 = getRandom(28, 32);
+  } else if (pH >= 7.53 && pH <= 7.60) {
+    hco3 = getRandom(33, 38);
+  }
+  document.querySelector(`input[name="HCO3"]`).value = `${hco3} mEq/L`;
+  
+  // PROCESS 4: pO₂ Generation (range: 60–100 mmHg)
+  const pO2 = getRandom(60, 100);
+  document.querySelector(`input[name="pO2"]`).value = `${pO2} mmHg`;
+  
+  // PROCESS 5: SO₂ Generation based on pO₂ tiers
+  let so2;
+  if (pO2 >= 60 && pO2 <= 70) {
+    so2 = getRandom(82, 88);
+  } else if (pO2 >= 71 && pO2 <= 80) {
+    so2 = getRandom(88, 92);
+  } else if (pO2 >= 81 && pO2 <= 90) {
+    so2 = getRandom(93, 95);
+  } else if (pO2 >= 91 && pO2 <= 100) {
+    so2 = getRandom(96, 99);
+  }
+  document.querySelector(`input[name="SO2"]`).value = `${so2}%`;
+  
+  // PROCESS 6: Trigger Arrow Evaluation for this condition
+  evaluateArrows();
+}
+
+// ----------------------------------------------------------
+// PROCESS: Metabolic Acidosis, Compensated
+// Purpose: Generate random ABG values to simulate compensated metabolic acidosis.
+// ----------------------------------------------------------
+function metabolicAcidosisCompensated() {
+  // UTIL: Random Number Generator Function
+  const getRandom = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+  
+  // PROCESS 1: pH Generation (range: 7.35–7.39)
+  const pH = (getRandom(735, 739) / 100).toFixed(2);
+  document.querySelector(`input[name="pH"]`).value = `${pH}`;
+  
+  // PROCESS 2: pCO₂ Generation (range: 30–34 mmHg)
+  const pCO2 = getRandom(30, 34);
+  document.querySelector(`input[name="pCO2"]`).value = `${pCO2} mmHg`;
+  
+  // PROCESS 3: pO₂ Generation (range: 60–100 mmHg)
+  const pO2 = getRandom(60, 100);
+  document.querySelector(`input[name="pO2"]`).value = `${pO2} mmHg`;
+  
+  // PROCESS 4: SO₂ Generation based on pO₂ tiers
+  let so2;
+  if (pO2 >= 60 && pO2 <= 70) {
+    so2 = getRandom(82, 88);
+  } else if (pO2 >= 71 && pO2 <= 80) {
+    so2 = getRandom(88, 92);
+  } else if (pO2 >= 81 && pO2 <= 90) {
+    so2 = getRandom(93, 95);
+  } else if (pO2 >= 91 && pO2 <= 100) {
+    so2 = getRandom(96, 99);
+  }
+  document.querySelector(`input[name="SO2"]`).value = `${so2}%`;
+
+  // PROCESS 5: HCO₃⁻ Generation (range: 15–21 mEq/L)
+  const hco3 = getRandom(15, 21);
+  document.querySelector(`input[name="HCO3"]`).value = `${hco3} mEq/L`;
+  
+  // PROCESS 6: Trigger Arrow Evaluation for this condition
+  evaluateArrows();
+}
+
+// ----------------------------------------------------------
+// PROCESS: Metabolic Alkalosis, Compensated
+// Purpose: Generate random ABG values to simulate compensated metabolic alkalosis.
+// ----------------------------------------------------------
+function metabolicAlkalosisCompensated() {
+  // UTIL: Random Number Generator Function
+  const getRandom = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+  
+  // PROCESS 1: pH Generation (range: 7.41–7.45)
+  const pH = (getRandom(741, 745) / 100).toFixed(2);
+  document.querySelector(`input[name="pH"]`).value = `${pH}`;
+  
+  // PROCESS 2: pCO₂ Generation (range: 46–60 mmHg)
+  const pCO2 = getRandom(46, 60);
+  document.querySelector(`input[name="pCO2"]`).value = `${pCO2} mmHg`;
+  
+  // PROCESS 3: pO₂ Generation (range: 60–100 mmHg)
+  const pO2 = getRandom(60, 100);
+  document.querySelector(`input[name="pO2"]`).value = `${pO2} mmHg`;
+  
+  // PROCESS 4: SO₂ Generation based on pO₂ tiers
+  let so2;
+  if (pO2 >= 60 && pO2 <= 70) {
+    so2 = getRandom(82, 88);
+  } else if (pO2 >= 71 && pO2 <= 80) {
+    so2 = getRandom(88, 92);
+  } else if (pO2 >= 81 && pO2 <= 90) {
+    so2 = getRandom(93, 95);
+  } else {
+    so2 = getRandom(96, 99);
+  }
+  document.querySelector(`input[name="SO2"]`).value = `${so2}%`;
+  
+  // PROCESS 5: HCO₃⁻ Generation based on pCO₂ range
+  let hco3;
+  if (pCO2 >= 46 && pCO2 <= 50) {
+    hco3 = getRandom(28, 32);
+  } else if (pCO2 >= 51 && pCO2 <= 60) {
+    hco3 = getRandom(33, 38);
+  } else {
+    hco3 = "";
+  }
+  const hco3Input = document.querySelector(`input[name="HCO3"]`);
+  hco3Input.value = hco3 !== "" ? `${hco3} mEq/L` : "";
+  
+  // PROCESS 6: Trigger Arrow Evaluation for this condition
+  evaluateArrows();
+}
+
+// ----------------------------------------------------------
+// PROCESS: Respiratory Acidosis, Partially Compensated
+// Purpose: Generate random ABG values to simulate partially compensated respiratory acidosis.
+// ----------------------------------------------------------
+function respiratoryAcidosisPartiallyCompensated() {
+  // UTIL: Random Number Generator Function
+  const getRandom = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+  
+  // PROCESS 1: pH Generation (range: 6.70–7.34)
+  const pH = (getRandom(670, 734) / 100).toFixed(2);
+  document.querySelector(`input[name="pH"]`).value = `${pH}`;
+  
+  // PROCESS 2: pCO₂ and HCO₃⁻ Generation based on pH tier
+  let pCO2, HCO3;
+  if (pH >= 6.70 && pH <= 7.10) {
+    pCO2 = getRandom(70, 90);
+    HCO3 = getRandom(29, 32);
+  } else if (pH >= 7.11 && pH <= 7.25) {
+    pCO2 = getRandom(55, 69);
+    HCO3 = getRandom(27, 28);
+  } else if (pH >= 7.26 && pH <= 7.34) {
+    pCO2 = getRandom(46, 68);
+    HCO3 = getRandom(25, 27);
+  } else {
+    pCO2 = "";
+    HCO3 = "";
+  }
+  
+  // PROCESS 3: Assign pCO₂ and HCO₃⁻ values with units if available.
+  const pco2Input = document.querySelector(`input[name="pCO2"]`);
+  pco2Input.value = pCO2 !== "" ? `${pCO2} mmHg` : "";
+  const hco3Input = document.querySelector(`input[name="HCO3"]`);
+  hco3Input.value = HCO3 !== "" ? `${HCO3} mEq/L` : "";
+  
+  // PROCESS 4: pO₂ Generation (range: 60–100 mmHg)
+  const pO2 = getRandom(60, 100);
+  document.querySelector(`input[name="pO2"]`).value = `${pO2} mmHg`;
+  
+  // PROCESS 5: SO₂ Generation based on pO₂ tiers
+  let SO2;
+  if (pO2 >= 60 && pO2 <= 70) {
+    SO2 = getRandom(82, 88);
+  } else if (pO2 >= 71 && pO2 <= 80) {
+    SO2 = getRandom(88, 92);
+  } else if (pO2 >= 81 && pO2 <= 90) {
+    SO2 = getRandom(93, 95);
+  } else {
+    SO2 = getRandom(96, 99);
+  }
+  document.querySelector(`input[name="SO2"]`).value = `${SO2}%`;
+  
+  // PROCESS 6: Trigger Arrow Evaluation for this condition
+  evaluateArrows();
+}
+
+
+
+
+
+
+
+
+ // ----------------------------------------------------------
+// SECTION 4: Random ABG Condition Selector
+// Purpose: Randomly select one of the predefined ABG condition functions.
+//          Also display the name of the condition used in the "conditionDisplay" element.
+// ----------------------------------------------------------
+function randomABGCondition() {
+  const abgConditions = [
+    metAcidPartComp,                    // Metabolic Acidosis, Partially Compensated
+    metAlkPartComp,                     // Metabolic Alkalosis, Partially Compensated
+    respAcidComp,                       // Respiratory Acidosis, Compensated
+    respAlkComp,                        // Respiratory Alkalosis, Compensated
+    respAlkPartComp,                    // Respiratory Alkalosis, Partially Compensated
+    respiratoryAcidosis,                // Respiratory Acidosis (Full)
+    respiratoryAlkalosis,               // Respiratory Alkalosis (Full)
+    metabolicAcidosis,                  // Metabolic Acidosis (Uncompensated)
+    metabolicAlkalosis,                 // Metabolic Alkalosis (Uncompensated)
+    metabolicAcidosisCompensated,       // Metabolic Acidosis, Compensated
+    metabolicAlkalosisCompensated,      // Metabolic Alkalosis, Compensated
+    respiratoryAcidosisPartiallyCompensated  // Respiratory Acidosis, Partially Compensated
+  ];
+  
+  // Randomly select a condition
+  const randomIndex = Math.floor(Math.random() * abgConditions.length);
+  const conditionFunction = abgConditions[randomIndex];
+  
+  // Get condition name from the function's "name" property
+  const conditionName = conditionFunction.name;
+  
+  // Update global variable for later use in analysis checking
+  currentABGCondition = conditionName;
+  
+  // Call the randomly selected condition function
+  conditionFunction();
+  
+  // Display the condition name in the designated element (for testing)
+  const conditionDisplayElement = document.querySelector('#conditionDisplay');
+  if (conditionDisplayElement) {
+    conditionDisplayElement.textContent = 'Condition: ' + conditionName;
+  } else {
+    console.log('Condition: ' + conditionName);
+  }
+}
+
+
+
+
+  // ----------------------------------------------------------
+  // SECTION 5: Add Units to Values
+  // Purpose: Iterate over all ABG input fields and append the designated units to their numeric values.
+  // ----------------------------------------------------------
+  function addUnits() {
+    const fields = ["pH", "pCO2", "pO2", "SO2", "HCO3"];
+    fields.forEach(field => {
+      const input = document.querySelector(`input[name='${field}']`);
+      const unit = units[field] || "";
+      if (!input) return;
+
+      // Extract the numeric portion (ignoring any preexisting letters or symbols)
+      const numericPart = input.value.replace(/[^\d.\-]/g, "");
+      if (numericPart && !isNaN(parseFloat(numericPart))) {
+        input.value = `${numericPart}${unit}`;
+      }
+    });
+  }
+
+  // ----------------------------------------------------------
+  // SECTION 5: Evaluate Arrow Indicators
+  // Purpose: Compare the current ABG values (with units removed) to normal ranges and display an arrow indicator.
+  //          "↓" if below normal, "↑" if above, or no arrow if within range.
+  // ----------------------------------------------------------
+  function evaluateArrows() {
+    const fields = ["pH", "pCO2", "pO2", "SO2", "HCO3"];
+    fields.forEach(field => {
+      const input = document.querySelector(`input[name='${field}']`);
+      const normBox = document.querySelector(`input[name='${field}norm']`);
+      if (!input || !normBox) return;
+      
+      // Remove units to get the numeric value.
+      const numericPart = input.value.replace(/[^\d.\-]/g, "");
+      const value = parseFloat(numericPart);
+
+      if (isNaN(value)) {
+        normBox.value = "";
+      } else if (value < normalRanges[field].min) {
+        normBox.value = "↓";
+      } else if (value > normalRanges[field].max) {
+        normBox.value = "↑";
+      } else {
+        normBox.value = "";
+      }
+    });
+  }
+
+// ----------------------------------------------------------
+// SECTION 6: Main Transition and Display Logic
+// Purpose: Handle UI transitions when the "generate ABG" button is clicked.
+//          Once the white container is visible and transitions complete:
+//            1. Generate a random ABG condition.
+//            2. Add the units to the new values.
+//            3. Evaluate and display arrow indicators.
+//            4. Display the ANALYZE button.
+// ----------------------------------------------------------
+document.querySelector(".generate-abg").addEventListener("click", function () {
+  const gem = document.querySelector(".gem");
+  const generateAbg = document.querySelector(".generate-abg");
+  const whiteContainer = document.querySelector(".white-container");
+  const listBoxes = document.querySelector(".list-boxes");
+  const analysisBounce = document.querySelector(".analysis-bounce");
+
+  whiteContainer.classList.add("visible");
+
+  whiteContainer.addEventListener("transitionend", function handler(e) {
+    if (e.propertyName !== "transform") return;
+    this.removeEventListener("transitionend", handler);
+
+    gem.classList.add("zoomed-out");
+    generateAbg.classList.add("zoomed-out");
+
+    let gemDone = false;
+    let abgDone = false;
+
+    function checkDone() {
+      if (gemDone && abgDone) {
+        setTimeout(() => {
+          gem.style.display = "none";
+          generateAbg.style.display = "none";
+
+          listBoxes.style.display = "flex";
+          if (analysisBounce) {
+            analysisBounce.style.display = "flex";
+          }
+
+          // Sequential steps:
+          // 1. Generate a random ABG condition.
+          // 2. Add units to the new values.
+          // 3. Evaluate and display arrow indicators.
+          randomABGCondition();
+          addUnits();
+          evaluateArrows();
+
+          // New Step: Display the ANALYZE button (initially hidden via CSS).
+          const analyzeBtn = document.querySelector('.analyze-btn');
+          if (analyzeBtn) {
+            analyzeBtn.style.display = 'block';
+          }
+        }, 50);
+      }
+    }
+
+    gem.addEventListener("transitionend", function gemHandler(e) {
+      if (e.propertyName === "transform") {
+        gem.removeEventListener("transitionend", gemHandler);
+        gemDone = true;
+        checkDone();
+      }
+    });
+
+    generateAbg.addEventListener("transitionend", function abgHandler(e) {
+      if (e.propertyName === "transform") {
+        generateAbg.removeEventListener("transitionend", abgHandler);
+        abgDone = true;
+        checkDone();
+      }
+    });
+  });
+});
+
+  // ----------------------------------------------------------
+  // SECTION 7: Initialize Read-Only Fields
+  // Purpose: Ensure that the ABG input fields remain read-only.
+  // ----------------------------------------------------------
+  window.addEventListener("DOMContentLoaded", () => {
+    const boxes = document.querySelectorAll(".criteria-box");
+    boxes.forEach(box => {
+      box.readOnly = true;
+    });
+  });
+
+// ----------------------------------------------------------
+// PROCESS: ANALYZE Button Functionality
+// Purpose: When the ANALYZE button is clicked, retrieve the user's answer
+//          selections from the list boxes, compare them to the expected answers
+//          from the abgConditionMapping, and update the result image accordingly.
+//          The user is allowed 3 attempts. If the third attempt is wrong, reveal the correct answer.
+// ----------------------------------------------------------
+document.querySelector('.analyze-btn').addEventListener('click', function() {
+  console.log("ANALYZE button clicked.");
+
+  // PROCESS 1: Capture User Selections from List Boxes
+  const acidBaseSelection = document.querySelector('select[name="ph"]').value;
+  const mechanismSelection = document.querySelector('select[name="mechanism"]').value;
+  const compensationSelection = document.querySelector('select[name="compensation"]').value;
+  console.log("User selections:", acidBaseSelection, mechanismSelection, compensationSelection);
+
+  // NEW: Check if any selection is left blank and display a popup if so.
+  if (acidBaseSelection === "" || mechanismSelection === "" || compensationSelection === "") {
+    alert("You must complete analysis criteria before proceeding");
+    return; // Stop processing if any criteria is missing.
+  }
+  
+  // PROCESS 2: Retrieve the Expected Answers from the Mapping
+  const expected = abgConditionMapping[currentABGCondition];
+  if (!expected) {
+    console.error("No expected answers found for currentABGCondition:", currentABGCondition);
+    return;
+  }
+  console.log("Expected answers:", expected);
+  
+  // PROCESS 3: Compare User Selections with Expected Answers
+  const isCorrect =
+    (acidBaseSelection === expected.acidBase) &&
+    (mechanismSelection === expected.mechanism) &&
+    (compensationSelection === expected.compensation);
+  console.log("Comparison result: isCorrect =", isCorrect);
+  
+  // PROCESS 4: Get feedback containers
+  const resultImageElement = document.getElementById('resultImage');
+  const resultContainer = document.getElementById('resultContainer');
+  const feedbackContainer = document.getElementById('answerFeedbackContainer');
+
+  if (!resultImageElement || !resultContainer || !feedbackContainer) {
+    console.error("One or more feedback elements were not found.");
+    return;
+  }
+
+  if (isCorrect) {
+    // Correct answer: Display the correct image for 3 seconds, then reload the page.
+    console.log("Correct answer!");
+    resultImageElement.src = "https://raw.githubusercontent.com/concussed8/ABG_tutor/main/Images/correct.png";
+    resultImageElement.style.display = 'block';
+    resultContainer.style.display = 'block';
+    // Hide the text feedback container in case it is visible.
+    feedbackContainer.style.display = 'none';
+    // Reset attempt count for next condition.
+    attemptCount = 0;
+    
+    setTimeout(function() {
+      resultContainer.style.display = 'none';
+      location.reload();
+    }, 3000);
+  } else {
+    // Incorrect answer
+    attemptCount++;
+    console.log("Incorrect answer, attemptCount =", attemptCount);
+    if (attemptCount < 3) {
+      // For attempts 1 and 2: Display the incorrect image temporarily for 3 seconds.
+      resultImageElement.src = "https://raw.githubusercontent.com/concussed8/ABG_tutor/main/Images/incorrect.png";
+      resultImageElement.style.display = 'block';
+      resultContainer.style.display = 'block';
+
+      // Hide the image container after 3 seconds.
+      setTimeout(function() {
+        resultContainer.style.display = 'none';
+      }, 3000);
+      
+      // Ensure the text feedback container is hidden.
+      feedbackContainer.style.display = 'none';
+    } else {
+      // On the third incorrect attempt, reveal the correct answer as text.
+      console.log("Third attempt: Revealing correct answer.");
+      // Hide the image container.
+      resultContainer.style.display = 'none';
+      
+      // Populate and display the feedback container with the correct answers.
+      feedbackContainer.innerHTML = `
+        <p style="font-size: 1.5em; text-align: center; margin: 20px; font-family: Georgia, serif; font-weight: bold; text-decoration: underline; color: red;">
+          Correct Answer<br><br><br><br>
+        </p>
+        <div style="text-align: left;">
+          <span style="font-family: Georgia, serif; font-weight: bold;">Compensation:</span> <span style="color: green;">${expected.compensation}</span><br><br>
+          <span style="font-family: Georgia, serif; font-weight: bold;">Mechanism:</span> <span style="color: green;">${expected.mechanism}</span><br><br>
+          <span style="font-family: Georgia, serif; font-weight: bold;">Acid-Base:</span> <span style="color: green;">${expected.acidBase}</span>
+        </div>
+        <br>
+        <button style="
+            display: block;
+            margin: 0 auto;
+            padding: 10px 20px;
+            font-size: 1em;
+            font-family: Georgia, serif;
+            background-color: #ccc;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+          " onclick="document.getElementById('answerFeedbackContainer').style.display='none'; setTimeout(() => location.reload(), 300);">
+          Close
+        </button>
+      `;
+      feedbackContainer.style.display = 'block';
+      attemptCount = 0;
+    }
+  }
+});
+
+
+
+</script>
+
+
+</body>
+</html>
