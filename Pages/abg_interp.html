@@ -2,10 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+
+  <!-- Prevent caching -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+
   <!-- Simulate a smartphone viewport -->
   <meta name="viewport" content="width=375, initial-scale=1.0">
+
   <title>Phone Container with Report</title>
-  <style>
+<style>
+
     /* Basic reset and page styling */
     body {
       margin: 0;
@@ -107,7 +115,7 @@
   transform: translateX(-50%);
   width: 22em; /* Wider for longer title */
   margin: 0 auto;
-  font-size: 175%;
+  font-size: 180%;
   font-family: 'Georgia', serif;
   font-weight: bold;
   text-align: center;
@@ -160,7 +168,7 @@
 .list-boxes {
   position: absolute;
   top: 60%;
-  left: 35%;
+  left: 30%;
   transform: translateX(-50%);
   display: none;        /* Hidden initially */
   flex-direction: column;
@@ -177,7 +185,7 @@
   border-radius: 5px;
   background-color: #fff;
   font-size: 1em;
-  width: 17ch;
+  width: 20ch;
   margin: 5px;
   background-image: url('data:image/svg+xml;utf8,<svg fill="black" height="12" viewBox="0 0 24 24" width="12" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
   background-repeat: no-repeat;
