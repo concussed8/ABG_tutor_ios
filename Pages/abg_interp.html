@@ -1343,7 +1343,7 @@ document.querySelector('.analyze-btn').addEventListener('click', function() {
   if (isCorrect) {
     // Correct answer: Display the correct image for 3 seconds, then reload the page.
     console.log("Correct answer!");
-    resultImageElement.src = "https://raw.githubusercontent.com/concussed8/ABG_tutor_ios_ios/main/Images/correct.png";
+    resultImageElement.src = "https://raw.githubusercontent.com/concussed8/ABG_tutor_ios/main/Images/correct.png";
     resultImageElement.style.display = 'block';
     resultContainer.style.display = 'block';
     // Hide the text feedback container in case it is visible.
@@ -1361,7 +1361,7 @@ document.querySelector('.analyze-btn').addEventListener('click', function() {
     console.log("Incorrect answer, attemptCount =", attemptCount);
     if (attemptCount < 3) {
       // For attempts 1 and 2: Display the incorrect image temporarily for 3 seconds.
-      resultImageElement.src = "https://raw.githubusercontent.com/concussed8/ABG_tutor_ios_ios/main/Images/incorrect.png";
+      resultImageElement.src = "https://raw.githubusercontent.com/concussed8/ABG_tutor_ios/main/Images/incorrect.png";
       resultImageElement.style.display = 'block';
       resultContainer.style.display = 'block';
 
