@@ -169,13 +169,22 @@
 }
 
     .list-box {
-      border: 1px solid black;
-      padding: 5px;
-      font-size: 1em;
-      background-color: #fff;
-      width: 22ch;  /* Adjust width as needed */
-      margin: 5px;
-    }
+  -webkit-appearance: none; /* iOS/Safari */
+  -moz-appearance: none;    /* Firefox */
+  appearance: none;
+  padding: 0.5em;
+  border: 1px solid #000;
+  border-radius: 5px;
+  background-color: #fff;
+  font-size: 1em;
+  width: 22ch;
+  margin: 5px;
+  background-image: url('data:image/svg+xml;utf8,<svg fill="black" height="12" viewBox="0 0 24 24" width="12" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
+}
+
 
  
    
